@@ -6,6 +6,60 @@ Report bugs on the [issue tracker](https://github.com/jdhoward5/CivilizationVI_C
 
 [Visit the original wiki!](https://github.com/Wild-W/CivilizationVI_CommunityExtension/wiki)
 
+## Building
+
+### Requirements
+- Visual Studio 2022 (MSVC v143)
+- Windows SDK
+- C++17 support
+
+### Dependencies
+
+This project depends on the following libraries (see [THIRD_PARTY.md](THIRD_PARTY.md) for details):
+
+| Library | Included | Notes |
+|---------|----------|-------|
+| [asmjit](https://github.com/asmjit/asmjit) | Yes | Full source vendored |
+| [Capstone](https://github.com/capstone-engine/capstone) | Headers only | Must build library |
+| [MinHook](https://github.com/TsudaKageyu/minhook) | Header only | Must build library |
+| [nlohmann/json](https://github.com/nlohmann/json) | Yes | Header-only |
+
+### Build Steps
+
+1. **Clone the repository**
+   ```
+   git clone https://github.com/jdhoward5/CivilizationVI_CommunityExtension.git
+   cd CivilizationVI_CommunityExtension
+   ```
+
+2. **Build MinHook**
+   ```
+   git clone https://github.com/TsudaKageyu/minhook.git
+   msbuild minhook/build/VC17/libMinHook.vcxproj /p:Configuration=Release /p:Platform=x64
+   mkdir lib\Release
+   copy minhook\build\VC17\lib\Release\libMinHook.x64.lib lib\Release\
+   ```
+
+3. **Build Capstone**
+   ```
+   git clone https://github.com/capstone-engine/capstone.git
+   cd capstone
+   cmake -B build -A x64
+   cmake --build build --config Release
+   cd ..
+   copy capstone\build\Release\capstone.lib lib\Release\
+   ```
+
+4. **Build the project**
+   ```
+   msbuild CivilizationVI_CommunityExtension.vcxproj /p:Configuration=Release /p:Platform=x64
+   ```
+
+The output DLL will be placed in:
+```
+%USERPROFILE%\Documents\My Games\Sid Meier's Civilization VI\Mods\CivilizationVI_CommunityExtension_Mod\Binaries\Win64\
+```
+
 ## FAQ
 
 ### What does this mod do?
@@ -22,3 +76,4 @@ This project is distributed under AGPL 3.0. That means that **all** derivative w
 
 ## Credits
 - Original project by [Wild-W](https://github.com/Wild-W)
+- Third-party libraries listed in [THIRD_PARTY.md](THIRD_PARTY.md)

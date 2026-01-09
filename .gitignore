@@ -362,3 +362,12 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /GameCore_XP2_FinalRelease.dll
+
+# Project-specific ignores
+.claude/
+projstructure.txt
+lib/
+
+# External library build directories (if cloned locally)
+/minhook/
+/capstone/
