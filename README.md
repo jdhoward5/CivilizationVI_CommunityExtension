@@ -24,7 +24,24 @@ This project depends on the following libraries (see [THIRD_PARTY.md](THIRD_PART
 | [MinHook](https://github.com/TsudaKageyu/minhook) | Header only | Must build library |
 | [nlohmann/json](https://github.com/nlohmann/json) | Yes | Header-only |
 
-### Build Steps
+### Quick Build (Recommended)
+
+Use the included PowerShell build script:
+
+```powershell
+.\build.ps1              # Build Release (default)
+.\build.ps1 -Clean       # Clean and rebuild
+.\build.ps1 -Debug       # Build Debug configuration
+.\build.ps1 -BuildDeps   # Force rebuild dependencies
+.\build.ps1 -Help        # Show all options
+```
+
+The script automatically clones and builds MinHook and Capstone if needed.
+
+### Manual Build Steps
+
+<details>
+<summary>Click to expand manual instructions</summary>
 
 1. **Clone the repository**
    ```
@@ -54,6 +71,8 @@ This project depends on the following libraries (see [THIRD_PARTY.md](THIRD_PART
    ```
    msbuild CivilizationVI_CommunityExtension.vcxproj /p:Configuration=Release /p:Platform=x64
    ```
+
+</details>
 
 The output DLL will be placed in:
 ```
