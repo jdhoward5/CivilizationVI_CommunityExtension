@@ -17,7 +17,7 @@ namespace AI::CongressSupport {
 
 		if (DoesProcessorExist(name)) {
 			auto variantMap = LuaVariantMap();
-			variantMap.emplace("OutcomeType", LuaVariant(outcomeType));
+			variantMap.emplace("OutcomeType", LuaVariant(static_cast<int>(outcomeType)));
 			variantMap.emplace("PlayerId", LuaVariant(*(int*)((uintptr_t)player + 0xd8)));
 			variantMap.emplace(decisionKey, LuaVariant(*(int*)((uintptr_t)modifierAnalysis + fieldOffset)));
 

@@ -6,6 +6,7 @@
 
 namespace Data {
     struct LuaVariant : public std::variant<std::string, double, int> {
+        using std::variant<std::string, double, int>::variant;
         void push(hks::lua_State* L) const;
     };
 

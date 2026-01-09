@@ -25,7 +25,7 @@ namespace MemoryManipulation {
     };
 
     namespace {
-        const asmjit::x86::Reg& GetRegister(FieldType fieldType, int index) {
+        const asmjit::Reg& GetRegister(FieldType fieldType, int index) {
             using namespace asmjit;
 
             switch (fieldType) {
@@ -172,14 +172,14 @@ namespace MemoryManipulation {
             return trampolineAddress;
         }
 
-        void PushDynamicValue(asmjit::x86::Assembler* a, std::pair<asmjit::x86::Reg, FieldType> pair) {
+        void PushDynamicValue(asmjit::x86::Assembler* a, std::pair<asmjit::Reg, FieldType> pair) {
             using namespace asmjit;
 
             if (pair.second == FIELD_FLOAT || pair.second == FIELD_DOUBLE) {
                 // Allocate space on the stack
                 a->sub(x86::rsp, 8);
                 // Move value onto the stack
-                a->movaps(x86::ptr(x86::rsp), pair.first.as<x86::Xmm>());
+                a->movaps(x86::ptr(x86::rsp), pair.first.as<x86::Vec>());
 
                 return;
             }
@@ -187,12 +187,12 @@ namespace MemoryManipulation {
             a->push(pair.first.as<x86::Gp>());
         }
 
-        void PopDynamicValue(asmjit::x86::Assembler* a, std::pair<asmjit::x86::Reg, FieldType> pair) {
+        void PopDynamicValue(asmjit::x86::Assembler* a, std::pair<asmjit::Reg, FieldType> pair) {
             using namespace asmjit;
 
             if (pair.second == FIELD_FLOAT || pair.second == FIELD_DOUBLE) {
                 // Move value from the stack into Xmm register
-                a->movaps(pair.first.as<x86::Xmm>(), x86::ptr(x86::rsp));
+                a->movaps(pair.first.as<x86::Vec>(), x86::ptr(x86::rsp));
                 // Reset stack pointer
                 a->add(x86::rsp, 8);
 
@@ -202,16 +202,16 @@ namespace MemoryManipulation {
             a->pop(pair.first.as<x86::Gp>());
         }
 
-        void* CreateLuaCallback(hks::lua_State* L, std::vector<std::pair<asmjit::x86::Reg, FieldType>> regs, void* trampoline, int luaCallbackIndex) {
+        void* CreateLuaCallback(hks::lua_State* L, std::vector<std::pair<asmjit::Reg, FieldType>> regs, void* trampoline, int luaCallbackIndex) {
             using namespace asmjit;
 
             CodeHolder code;
-            code.init(Runtime::Jit.environment(), Runtime::Jit.cpuFeatures());
+            code.init(Runtime::Jit.environment(), Runtime::Jit.cpu_features());
 
             x86::Assembler a(&code);
 
             FileLogger logger(stdout);
-            code.setLogger(&logger);
+            code.set_logger(&logger);
 
             // Begin constructing the function
             // Function prologue
@@ -242,7 +242,7 @@ namespace MemoryManipulation {
                 case FIELD_FLOAT:
                 case FIELD_DOUBLE:
                     // Put floating point number in parameter 2
-                    a.movaps(x86::xmm1, pair.first.as<x86::Xmm>());
+                    a.movaps(x86::xmm1, pair.first.as<x86::Vec>());
                     a.call(hks::pushnumber);
                     break;
 
@@ -301,7 +301,7 @@ namespace MemoryManipulation {
             VirtualProtect(func, buffer.size(), PAGE_EXECUTE_READ, &oldProtect);*/
 
             Error err = Runtime::Jit.add(&func, &code);
-            if (err) {
+            if (err != Error::kOk) {
                 hks::error(L, "Failed to create the hook function!");
                 return nullptr;
             }
@@ -318,7 +318,7 @@ namespace MemoryManipulation {
         /// 6: Appends the hook function with a jump to the trampoline function
         /// 7: Overwrites the first 5 bytes of the target function with a jump to the hook function
         /// Voila!
-        void RegisterCallEvent(hks::lua_State* L, void* targetFunction, std::vector<std::pair<asmjit::x86::Reg, FieldType>> regs, int luaCallbackIndex) {
+        void RegisterCallEvent(hks::lua_State* L, void* targetFunction, std::vector<std::pair<asmjit::Reg, FieldType>> regs, int luaCallbackIndex) {
             csh handle;
             cs_insn* insn;
             size_t count;
@@ -452,7 +452,7 @@ namespace MemoryManipulation {
             uintptr_t address = static_cast<uintptr_t>(hks::checknumber(L, 2));
 
             int parametersLength = hks::objlen(L, 3);
-            std::vector<std::pair<asmjit::x86::Reg, FieldType>> parameters;
+            std::vector<std::pair<asmjit::Reg, FieldType>> parameters;
             for (int i = 1; i <= parametersLength; i++) {
                 hks::pushinteger(L, i);
                 hks::gettable(L, 3);

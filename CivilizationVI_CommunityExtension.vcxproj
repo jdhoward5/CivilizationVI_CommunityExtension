@@ -102,7 +102,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)lib\$(Configuration)</LibraryPath>
-    <OutDir>..\..\..\OneDrive\Documents\My Games\Sid Meier%27s Civilization VI\Mods\CivilizationVI_CommunityExtension_Mod\Binaries\Win64</OutDir>
+    <OutDir>..\..\Documents\My Games\Sid Meier%27s Civilization VI\Mods\CivilizationVI_CommunityExtension_Mod\Binaries\Win64</OutDir>
     <TargetName>GameCore_XP2_CE_FinalRelease</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugCopy|x64'">
@@ -161,6 +161,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -175,9 +177,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;ASMJIT_STATIC;ASMJIT_NO_AARCH64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>
-      </AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -188,7 +189,7 @@
       </ModuleDefinitionFile>
       <AddModuleNamesToAssembly>
       </AddModuleNamesToAssembly>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>capstone.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -200,8 +201,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>
-      </AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -246,16 +247,16 @@
     <ClCompile Include="asmjit\core\rapass.cpp" />
     <ClCompile Include="asmjit\core\rastack.cpp" />
     <ClCompile Include="asmjit\core\string.cpp" />
-    <ClCompile Include="asmjit\core\support.cpp" />
     <ClCompile Include="asmjit\core\target.cpp" />
     <ClCompile Include="asmjit\core\type.cpp" />
     <ClCompile Include="asmjit\core\virtmem.cpp" />
-    <ClCompile Include="asmjit\core\zone.cpp" />
-    <ClCompile Include="asmjit\core\zonehash.cpp" />
-    <ClCompile Include="asmjit\core\zonelist.cpp" />
-    <ClCompile Include="asmjit\core\zonestack.cpp" />
-    <ClCompile Include="asmjit\core\zonetree.cpp" />
-    <ClCompile Include="asmjit\core\zonevector.cpp" />
+    <ClCompile Include="asmjit\support\arena.cpp" />
+    <ClCompile Include="asmjit\support\arenabitset.cpp" />
+    <ClCompile Include="asmjit\support\arenahash.cpp" />
+    <ClCompile Include="asmjit\support\arenalist.cpp" />
+    <ClCompile Include="asmjit\support\arenatree.cpp" />
+    <ClCompile Include="asmjit\support\arenavector.cpp" />
+    <ClCompile Include="asmjit\support\support.cpp" />
     <ClCompile Include="asmjit\x86\x86assembler.cpp" />
     <ClCompile Include="asmjit\x86\x86builder.cpp" />
     <ClCompile Include="asmjit\x86\x86compiler.cpp" />
