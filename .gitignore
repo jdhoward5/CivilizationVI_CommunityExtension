@@ -371,3 +371,6 @@ lib/
 # External library build directories (if cloned locally)
 /minhook/
 /capstone/
+
+# VSCode settings folder
+.vscode/
