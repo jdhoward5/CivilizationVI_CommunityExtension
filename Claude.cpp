@@ -3,6 +3,7 @@
 #include <winhttp.h>
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 #include <vector>
 #include <cstdlib>
 
@@ -25,6 +26,9 @@ namespace Claude {
     static std::mutex g_queueMutex;
     static std::atomic<bool> g_asyncPending(false);
     static std::thread g_asyncThread;
+
+    // Cooldown - one query per turn
+    static int g_lastQueryTurn = -1;
 
     // Helper to get API key from environment or stored variable
     static std::string GetAPIKey() {
@@ -103,7 +107,7 @@ namespace Claude {
         requestBody["max_tokens"] = g_maxTokens;
 
         if (!systemPrompt.empty()) {
-            requestBody["system_prompt"] = systemPrompt;
+            requestBody["system"] = systemPrompt;
         }
 
         requestBody["messages"] = json::array({
@@ -273,6 +277,24 @@ namespace Claude {
         });
     }
 
+    std::string QueryForTurn(int turnNumber, const std::string& prompt, const std::string& systemPrompt) {
+        if (turnNumber == g_lastQueryTurn) {
+            return "Error: Only one Claude query allowed per turn.";
+        }
+        g_lastQueryTurn = turnNumber;
+        return Query(prompt, systemPrompt);
+    }
+
+    void QueryForTurnAsync(int turnNumber, const std::string& prompt, const std::string& systemPrompt) {
+        if (turnNumber == g_lastQueryTurn) {
+            std::lock_guard<std::mutex> lock(g_queueMutex);
+            g_responseQueue.push("Error: Only one Claude query allowed per turn.");
+            return;
+        }
+        g_lastQueryTurn = turnNumber;
+        QueryAsync(prompt, systemPrompt);
+    }
+
     bool HasResponse() {
         std::lock_guard<std::mutex> lock(g_queueMutex);
         return !g_responseQueue.empty();
@@ -327,6 +349,37 @@ namespace Claude {
         return 0; // No return values
     }
 
+    // Claude.QueryForTurn(turnNumber, prompt [, systemPrompt]) -> string
+    int lua_QueryForTurn(hks::lua_State* L) {
+        int turnNumber = hks::checkinteger(L, 1);
+        const char* prompt = hks::checklstring(L, 2, nullptr);
+        const char* systemPrompt = "";
+
+        if (hks::gettop(L) >= 3) {
+            systemPrompt = hks::checklstring(L, 3, nullptr);
+        }
+
+        std::string result = QueryForTurn(turnNumber, prompt, systemPrompt);
+        hks::pushfstring(L, "%s", result.c_str());
+
+        return 1;
+    }
+
+    // Claude.QueryForTurnAsync(turnNumber, prompt [, systemPrompt]) -> nil
+    int lua_QueryForTurnAsync(hks::lua_State* L) {
+        int turnNumber = hks::checkinteger(L, 1);
+        const char* prompt = hks::checklstring(L, 2, nullptr);
+        const char* systemPrompt = "";
+
+        if (hks::gettop(L) >= 3) {
+            systemPrompt = hks::checklstring(L, 3, nullptr);
+        }
+
+        QueryForTurnAsync(turnNumber, prompt, systemPrompt);
+
+        return 0;
+    }
+
     // Claude.HasResponse() -> bool
     int lua_HasResponse(hks::lua_State* L) {
         hks::pushboolean(L, HasResponse());
@@ -366,7 +419,7 @@ namespace Claude {
         std::cout << "[Claude] Registering Lua bindings...\n";
 
         // Create the Claude table
-        hks::createtable(L, 0, 7); // 7 functions
+        hks::createtable(L, 0, 9); // 9 functions
 
         // Add functions
         hks::pushnamedcclosure(L, lua_Query, 0, "lua_Query", 0);
@@ -374,6 +427,12 @@ namespace Claude {
 
         hks::pushnamedcclosure(L, lua_QueryAsync, 0, "lua_QueryAsync", 0);
         hks::setfield(L, -2, "QueryAsync");
+
+        hks::pushnamedcclosure(L, lua_QueryForTurn, 0, "lua_QueryForTurn", 0);
+        hks::setfield(L, -2, "QueryForTurn");
+
+        hks::pushnamedcclosure(L, lua_QueryForTurnAsync, 0, "lua_QueryForTurnAsync", 0);
+        hks::setfield(L, -2, "QueryForTurnAsync");
 
         hks::pushnamedcclosure(L, lua_HasResponse, 0, "lua_HasResponse", 0);
         hks::setfield(L, -2, "HasResponse");
