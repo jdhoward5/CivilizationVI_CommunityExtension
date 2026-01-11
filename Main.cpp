@@ -25,6 +25,7 @@
 #include "AI.h"
 #include "EventSystems.h"
 #include "NationalParks.h"
+#include "Claude.h"
 
 HANDLE mainThread;
 
@@ -69,6 +70,7 @@ void __cdecl Hook_RegisterScriptData(hks::lua_State* L) {
     CCallWithErrorHandling(L, AI::CongressSupport::RegisterOutcomeTypes, NULL);
     CCallWithErrorHandling(L, AI::Espionage::RegisterAIEspionageManager, NULL);
     CCallWithErrorHandling(L, NationalParks::Register, NULL);
+    CCallWithErrorHandling(L, Claude::Register, NULL);
 
     base_RegisterScriptData(L);
 }
