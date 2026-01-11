@@ -37,7 +37,7 @@ namespace Claude {
         }
         char *envKey = nullptr;
         size_t len = 0;
-        if (_dupenv_s(&envKey, &len, "CLAUDE_API_KEY") == 0 && envKey != nullptr) {
+        if (_dupenv_s(&envKey, &len, "ANTHROPIC_API_KEY") == 0 && envKey != nullptr) {
             std::string key(envKey);
             free(envKey);
             return key;
